@@ -1,3 +1,14 @@
+FROM alpine AS oqs-provider
+
+RUN apk add --no-cache cmake git g++ make ninja openssl openssl-dev
+
+RUN git clone --depth 1 --branch 0.12.0 https://github.com/open-quantum-safe/liboqs.git
+RUN git clone --depth 1 --branch 0.8.0 https://github.com/open-quantum-safe/oqs-provider.git
+
+ARG liboqs_DIR=/.local
+RUN cd liboqs && cmake -GNinja -DCMAKE_INSTALL_PREFIX=$liboqs_DIR -S . -B _build && cd _build && ninja && ninja install
+RUN cd oqs-provider && cmake -S . -B _build && cmake --build _build && cmake --install _build
+
 FROM node:lts AS webapp
 RUN \
   apt-get update \
@@ -29,6 +40,24 @@ FROM nginx:mainline-alpine
 # Add dependencies for our scripts
 RUN apk add --no-cache bash openssl inotify-tools
 
+# mountable content for web app (remove default stuff in there)
+RUN rm /usr/share/nginx/html/*
+COPY html/503.html /usr/share/nginx/html
+COPY --from=webapp /usr/src/app/dist /usr/share/nginx/html
+
+# configure openssl to use OQS provider
+COPY --from=oqs-provider /oqs-provider/_build/lib/oqsprovider.so /
+RUN cat <<EOF  >> /etc/ssl/openssl.cnf
+[provider_sect]
+default = default_sect
+oqsprovider = oqsprovider_sect
+[default_sect]
+activate = 1
+[oqsprovider_sect]
+activate = 1
+module = /oqsprovider.so
+EOF
+
 # nginx configuration and entrypoint
 COPY conf /etc/nginx
 COPY entrypoint.sh .
@@ -39,10 +68,5 @@ VOLUME /etc/ssl/private
 
 # mountable content for /.well-known/ ACME challenge
 VOLUME /var/www/html
-
-# mountable content for web app (remove default stuff in there)
-RUN rm /usr/share/nginx/html/*
-COPY html/503.html /usr/share/nginx/html
-COPY --from=webapp /usr/src/app/dist /usr/share/nginx/html
 
 CMD ["./entrypoint.sh"]
