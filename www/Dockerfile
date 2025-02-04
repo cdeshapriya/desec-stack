@@ -1,9 +1,13 @@
 FROM alpine AS oqs-provider
 
-RUN apk add --no-cache cmake git g++ make ninja openssl openssl-dev
+ARG LIBOQS_VERSION="0.12.0"
+ARG OQSPROVIDER_VERSION="0.8.0"
 
-RUN git clone --depth 1 --branch 0.12.0 https://github.com/open-quantum-safe/liboqs.git
-RUN git clone --depth 1 --branch 0.8.0 https://github.com/open-quantum-safe/oqs-provider.git
+RUN test -z ${LIBOQS_VERSION} && exit 1
+RUN test -z ${OQSPROVIDER_VERSION} && exit 2
+
+RUN git clone --depth 1 --branch ${LIBOQS_VERSION} https://github.com/open-quantum-safe/liboqs.git
+RUN git clone --depth 1 --branch ${OQSPROVIDER_VERSION} https://github.com/open-quantum-safe/oqs-provider.git
 
 ARG liboqs_DIR=/.local
 RUN cd liboqs && cmake -GNinja -DCMAKE_INSTALL_PREFIX=$liboqs_DIR -S . -B _build && cd _build && ninja && ninja install
