@@ -1,7 +1,6 @@
-deSEC Stack
-===========
+# deSEC Stack
 
-This is a docker compose application providing the basic stack for deSEC name services. It consists of
+This is a docker compose application providing the basic stack for deSEC name services. It consists of the following major components.
 
 - `nslord`: Eventually authoritative DNS server (PowerDNS). DNSSEC keying material is generated here.
 - `nsmaster`: Stealth authoritative DNS server (PowerDNS). Receives fully signed AXFR zone transfers from `nslord`. No access to keys.
@@ -14,15 +13,21 @@ This is a docker compose application providing the basic stack for deSEC name se
 - `openvpn-server`: OpenVPN server used to tunnel replication traffic between this stack and frontend DNS secondaries
 - `prometheus`: Prometheus server for monitoring
 
-Requirements
-------------
+## Requirements
 
-## Install Docker Deamon
+### Install Docker Deamon
 
+- Download the installation script
+  
+  ```
+  curl -fsSL https://get.docker.com -o get-docker.sh  
 ```
-curl -fsSL https://get.docker.com -o get-docker.sh
-sh get-docker.sh
-```
+
+- Run the installation script
+
+  ```
+  sh get-docker.sh
+  ```
 
 Although most configuration is contained in this repository, some external dependencies need to be met before the application can be run. Dependencies are:
 
@@ -53,18 +58,24 @@ sudo systemctl restart docker
 
 3.  Also, configure certificates for `openvpn-server`:
 
-    - [Get easy-rsa](https://github.com/OpenVPN/easy-rsa) and follow [this tutorial](https://github.com/OpenVPN/easy-rsa/blob/master/README.quickstart.md).
-    - Then, copy `ca.crt`, `server.crt`, and `server.key` to `openvpn-server/secrets/`.
+- [Get easy-rsa](https://github.com/OpenVPN/easy-rsa) and follow [this tutorial](https://github.com/OpenVPN/easy-rsa/blob/master/README.quickstart.md).
+    
+- Then, copy `ca.crt`, `server.crt`, and `server.key` to `openvpn-server/secrets/`.
     - Create a pre-shared secret using `openvpn --genkey --secret ta.key` inside `openvpn-server/secrets/`.
 
-    For provisioning a secondary, use the same `easy-rsa` PKI and create a new `client.key` and `client.crt` pair. Transfer these securely onto the secondary, along with `ca.crt` and `ta.key`.
-    (You can also create the key on the secondary and only transfer a certificate signing request and the certificate.)
+For provisioning a secondary, use the same `easy-rsa` PKI and create a new `client.key` and `client.crt` pair. Transfer these securely onto the secondary, along with `ca.crt` and `ta.key`.
+(You can also create the key on the secondary and only transfer a certificate signing request and the certificate.)
 
 4.  Set sensitive information and network topology using environment variables or an `.env` file. You need (you can use the `.env.default` file as a template):
+   
     - global
+    
       - `DESECSTACK_DOMAIN`: domain name under which the entire system will be running. The API will be reachable at https://desec.$DESECSTACK_DOMAIN/api/. For development setup, we recommend using `yourname.dedyn.io`
-      - `DESECSTACK_NS`: the names of the authoritative name servers, i.e. names pointing to your secondary name servers. Minimum 2.
+   
+       - `DESECSTACK_NS`: the names of the authoritative name servers, i.e. names pointing to your secondary name servers. Minimum 2.
+
     - network
+      
       - `DESECSTACK_IPV4_REAR_PREFIX16`: IPv4 net, size /16, for assignment of internal container IPv4 addresses. **NOTE:** If you change this in an existing setup, you 
         need to manually update persisted data structures such as the MySQL grant tables! Better don't do it.
       - `DESECSTACK_IPV6_SUBNET`: IPv6 net, ideally /80 (see below)
@@ -72,6 +83,7 @@ sudo systemctl restart docker
       - `DESECSTACK_PORT_XFR`: Port over which XFRs are performed with secondaries
     - certificates
       - `DESECSTACK_WWW_CERTS`: `./path/to/certificates` for `www` container. This directory is monitored for changes so that nginx can reload when new keys/certificates are provided. **Note:** The reload is done any time something changes in the directory. The relevant files are **not** watched individually.
+        
     - API-related
       - `DESECSTACK_API_ADMIN`: white-space separated list of Django admin email addresses
       - `DESECSTACK_API_AUTHACTION_VALIDITY`: number of hours for which authenticated action links (e.g. email verification) should be considered valid (default: 0)
@@ -85,6 +97,7 @@ sudo systemctl restart docker
       - `DESECSTACK_API_PSL_RESOLVER`: Resolver IP address to use for PSL lookups. If empty, the system's default resolver is used.
       - `DESECSTACK_DBAPI_PASSWORD_desec`: database password for desecapi
       - `DESECSTACK_MINIMUM_TTL_DEFAULT`: minimum TTL users can set for RRsets. The setting is per domain, and the default defined here is used on domain creation.
+   
     - nslord-related
       - `DESECSTACK_DBLORD_PASSWORD_pdns`: mysql password for pdns on nslord
       - `DESECSTACK_NSLORD_APIKEY`: pdns API key on nslord
