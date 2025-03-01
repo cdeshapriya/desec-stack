@@ -70,7 +70,7 @@ For provisioning a secondary, use the same `easy-rsa` PKI and create a new `clie
 
 4.  Set sensitive information and network topology using environment variables or an `.env` file. You need (you can use the `.env.default` file as a template):
    
-    - ** Global Configuration
+    - **Global Configuration
     
       - `DESECSTACK_DOMAIN`: domain name under which the entire system will be running. The API will be reachable at https://desec.$DESECSTACK_DOMAIN/api/. For development setup, we recommend using `yourname.dedyn.io`
    
