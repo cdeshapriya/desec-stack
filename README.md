@@ -17,15 +17,22 @@ This is a docker compose application providing the basic stack for deSEC name se
 Requirements
 ------------
 
+## Install Docker Deamon
+
+```
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+``
+
 Although most configuration is contained in this repository, some external dependencies need to be met before the application can be run. Dependencies are:
 
 1.  We run this software with the `--userland-proxy=false` flag of the `dockerd` daemon, and recommend you do the same.
 
-     Disabling the Userland proxy constitutes a global setting, established at the daemon level. This configuration cannot be     altered from the client, and hence not via Docker Compose.
+Disabling the Userland proxy constitutes a global setting, established at the daemon level. This configuration cannot be     altered from the client, and hence not via Docker Compose.
 
-To disable the proxy, you must modify the daemon configuration (according to the dockerd documentation). Execute the following steps on the host where the daemon operates:
+To disable the proxy, you must modify the daemon configuration (according to the `dockerd` documentation). Execute the following steps on the host where the daemon operates:
 
-Establish a file titled /etc/docker/daemon.json if it is absent, and incorporate the "userland-proxy": false configuration. The daemon.json file must be valid JSON; if this is the sole configuration within that file, it should seem as follows:
+Establish a file titled `/etc/docker/daemon.json` if it is absent, and incorporate the "userland-proxy": false configuration. The daemon.json file must be valid JSON; if this is the sole configuration within that file, it should seem as follows:
 
 ```
 sudo nano /etc/docker/daemon.json
@@ -100,11 +107,15 @@ How to Run
 
 Development:
 
-    $ ./dev
+```
+$ ./dev
+```
 
 Production:
 
-    $ docker compose build && docker compose up
+```
+$ docker compose build && docker compose up
+```
 
 Storage
 -------
@@ -128,10 +139,10 @@ Notes on IPv6
 
 This stack is IPv6-capable. Caveats:
 
-  - It is not necessary to start the Docker daemon with `--ipv6` or `--fixed-cidr-v6`. However, it is recommended to run `dockerd` with `--userland-proxy=false` to avoid 
+- It is not necessary to start the Docker daemon with `--ipv6` or `--fixed-cidr-v6`. However, it is recommended to run `dockerd` with `--userland-proxy=false` to avoid 
     exposing ports on the host IPv6 address through `docker-proxy`.
 
-  - Topology: Assuming 2a01:4f8:a0:12eb::/64 is the host network, and we reserve 2a01:4f8:a0:12eb:deec::/80 for the deSEC stack. Docker has more or less established that 
+- Topology: Assuming 2a01:4f8:a0:12eb::/64 is the host network, and we reserve 2a01:4f8:a0:12eb:deec::/80 for the deSEC stack. Docker has more or less established that 
     IPv6 addresses be composed of the /80 prefix and the container MAC address. We choose the private 06:42:ac MAC prefix, defining a /104 subnet. For the remaining 24 
     bits of the MAC and IPv6 address, the convention seems to be to use the last 24 bits from the internally assigned IPv4 address. However, the first 8 of these are 
     configurable through the `DESECSTACK_IPV4_REAR_PREFIX16` variable. Since we don't want public IPv6 addresses to change if the internal IPv4 net prefix changes, we use 
@@ -139,16 +150,19 @@ This stack is IPv6-capable. Caveats:
     of the IPv6 address we indeed take from the internally assigned IP address. The same procedure is used to set the MAC address of IPv6 containers (they begin with 
     `06:42:ac:10:`).
 
-    All other traffic in the /80 subnet is unexpected and therefore rejected. This includes traffic for IPv6 addresses that Docker assigns. (If Docker uses the MAC address 
-    for this purpose, the prefix is 02:42:ac which is not part of our public network, so we're safe.)
+All other traffic in the /80 subnet is unexpected and therefore rejected. This includes traffic for IPv6 addresses that Docker assigns. (If Docker uses the MAC address 
 
-    Since the above topology is strictly determined by the /80 prefix and the MAC address, we hope that most of the hardcoding can be removed in the future.
+For this purpose, the prefix is 02:42:ac which is not part of our public network, so we're safe.)
+
+Since the above topology is strictly determined by the /80 prefix and the MAC address, we hope that most of the hardcoding can be removed in the future.
 
   - Docker currently exposes IPv6-capable containers fully, without restriction. Therefore, it is necessary to set up a firewall, like (`ip6tables`)
 
-        -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
-        -A FORWARD -d 2a01:4f8:a0:12eb:deec:642:ac10:0/108 -i eth0 -j ACCEPT
-        -A FORWARD -d 2a01:4f8:a0:12eb:deec::/80 -i eth0 -j REJECT --reject-with icmp6-port-unreachable
+```
+-A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A FORWARD -d 2a01:4f8:a0:12eb:deec:642:ac10:0/108 -i eth0 -j ACCEPT
+-A FORWARD -d 2a01:4f8:a0:12eb:deec::/80 -i eth0 -j REJECT --reject-with icmp6-port-unreachable
+```
 
 Development: Getting Started Guide
 ----------------------------------
@@ -164,13 +178,15 @@ While there are certainly many ways to get started hacking desec-stack, here is 
     jq, httpie, libmariadb-dev, libpq-dev, python3-dev (>= 3.12) and python3-venv (>= 3.12) are useful if you want to follow this guide.
     The webapp requires Node.js. To install everything you need for this guide except docker and docker compose, use
 
-       sudo apt install certbot curl git httpie jq libmariadb-dev libpq-dev nodejs npm python3-dev python3-venv libmemcached-dev
+```
+sudo apt install certbot curl git httpie jq libmariadb-dev libpq-dev nodejs npm python3-dev python3-venv libmemcached-dev
+```
 
 1. **Get the code.** Clone this repository to your favorite location.
 
        git clone git@github.com:desec-io/desec-stack.git
 
-1. **Obtain Domain Names.** To run desec-stack, this guide uses a subdomain of dedyn.io provided by desec.io.
+2. **Obtain Domain Names.** To run desec-stack, this guide uses a subdomain of dedyn.io provided by desec.io.
 
     1. Register a deSEC user account. Check out the instructions in our [documentation](https://desec.readthedocs.io/),
        in particular the [Quickstart](https://desec.readthedocs.io/en/latest/quickstart.html) section.
@@ -178,45 +194,60 @@ While there are certainly many ways to get started hacking desec-stack, here is 
     2. Register a dedyn.io subdomain to run your desec-stack on it and set up the IP addresses.
         For this guide, we assume `example.dedyn.io`. Register it with:
 
-           DOMAIN=example.dedyn.io
-           http POST https://desec.io/api/v1/domains/ Authorization:"Token ${TOKEN}" name:='"'${DOMAIN}'"'
+```
+export DOMAIN=example.dedyn.io
+```     
+```
+http POST https://desec.io/api/v1/domains/ Authorization:"Token ${TOKEN}" name:='"'${DOMAIN}'"'
+```
 
-        If you receive an answer that is different from status code 201, chances are that the name you chose is already taken by someone else.
-        In that case, repeat the last step with a new name.
-        To setup the necessary IP address records, we create a couple of A and AAAA records that point to localhost.
-        As preparation, create a JSON file `dns.json` with the following content defining the DNS setup for desec-stack:
+If you receive an answer that is different from status code 201, chances are that the name you chose is already taken by someone else.
 
-           [
-               {"type": "A",    "ttl":300, "records": ["127.0.0.1"], "subname": "desec"},
-               {"type": "AAAA", "ttl":300, "records": ["::1"],       "subname": "desec"},
-               {"type": "A",    "ttl":300, "records": ["127.0.0.1"], "subname": "*.desec"},
-               {"type": "AAAA", "ttl":300, "records": ["::1"],       "subname": "*.desec"},
+In that case, repeat the last step with a new name.
 
-               {"type": "A",    "ttl":300, "records": ["127.0.0.1"], "subname": "dedyn"},
-               {"type": "AAAA", "ttl":300, "records": ["::1"],       "subname": "dedyn"},
-               {"type": "A",    "ttl":300, "records": ["127.0.0.1"], "subname": "*.dedyn"},
-               {"type": "AAAA", "ttl":300, "records": ["::1"],       "subname": "*.dedyn"}
-           ]
+To setup the necessary IP address records, we create a couple of A and AAAA records that point to localhost.
 
-        We use the deSEC API to publish the DNS information as defined in `dns.json`:
+As preparation, create a JSON file `dns.json` with the following content defining the DNS setup for desec-stack:
 
-           http POST https://desec.io/api/v1/domains/${DOMAIN}/rrsets/ Authorization:"Token ${TOKEN}" < dns.json
+```
+[
+     {"type": "A",    "ttl":300, "records": ["127.0.0.1"], "subname": "desec"},             
+     {"type": "AAAA", "ttl":300, "records": ["::1"],       "subname": "desec"},
+     {"type": "A",    "ttl":300, "records": ["127.0.0.1"], "subname": "*.desec"},
+     {"type": "AAAA", "ttl":300, "records": ["::1"],       "subname": "*.desec"},
+
+     {"type": "A",    "ttl":300, "records": ["127.0.0.1"], "subname": "dedyn"},
+     {"type": "AAAA", "ttl":300, "records": ["::1"],       "subname": "dedyn"},
+     {"type": "A",    "ttl":300, "records": ["127.0.0.1"], "subname": "*.dedyn"},
+     {"type": "AAAA", "ttl":300, "records": ["::1"],       "subname": "*.dedyn"}
+]
+```
+
+We use the deSEC API to publish the DNS information as defined in `dns.json`:
+
+```
+http POST https://desec.io/api/v1/domains/${DOMAIN}/rrsets/ Authorization:"Token ${TOKEN}" < dns.json
+```
 
 1. **Obtain certificates.** desec-stack requires SSL certificates for the above-mentioned `desec` and `dedyn` hostnames as well as for various subdomains.
-    (For a complete list, see `www/README.md`.)
-    While we recommend to obtain signed certificates from Let's Encrypt, it's also possible to let desec-stack generate self-signed certificates on startup
-    by just skipping this step. To use the deSEC certbot hook, first download it to an appropriate location and set up your credentials and domain name.
 
-       mkdir -p ~/bin
-       cd ~/bin
-       curl https://raw.githubusercontent.com/desec-io/desec-certbot-hook/main/hook.sh > desec_certbot_hook.sh
-       touch .dedynauth; chmod 600 .dedynauth
-       echo DEDYN_TOKEN=${TOKEN} >> .dedynauth
-       echo DEDYN_NAME=${DOMAIN} >> .dedynauth
-       chmod +x desec_certbot_hook.sh
+(For a complete list, see `www/README.md`.)
 
-    Now we use `certbot` to obtain certificates, using the DNS challenge for authentication. Your current directory should be `~/bin`
+While we recommend to obtain signed certificates from Let's Encrypt, it's also possible to let desec-stack generate self-signed certificates on startup by just skipping this step. To use the deSEC certbot hook, first download it to an appropriate location and set up your credentials and domain name.
 
+```
+mkdir -p ~/bin
+cd ~/bin
+curl https://raw.githubusercontent.com/desec-io/desec-certbot-hook/main/hook.sh > desec_certbot_hook.sh
+touch .dedynauth; chmod 600 .dedynauth
+echo DEDYN_TOKEN=${TOKEN} >> .dedynauth
+echo DEDYN_NAME=${DOMAIN} >> .dedynauth
+chmod +x desec_certbot_hook.sh
+```
+
+Now we use `certbot` to obtain certificates, using the DNS challenge for authentication. Your current directory should be `~/bin`
+
+```
        certbot \
            --config-dir certbot/config --logs-dir certbot/logs --work-dir certbot/work \
            --manual --text --preferred-challenges dns \
@@ -226,6 +257,7 @@ While there are certainly many ways to get started hacking desec-stack, here is 
            -d "*.${DOMAIN}" -d "update.dedyn.${DOMAIN}" -d "update4.dedyn.$DOMAIN" -d "update6.dedyn.$DOMAIN" \
            -d "checkip.dedyn.${DOMAIN}" -d "checkipv4.dedyn.${DOMAIN}" -d "checkipv6.dedyn.${DOMAIN}" \
            certonly
+```
 
     Note that the definition of config, logs and work dir are only necessary if you do not want to run certbot as root.
     Verifying the DNS challenge takes a while, so allow this command to take a couple of minutes.
@@ -243,6 +275,7 @@ While there are certainly many ways to get started hacking desec-stack, here is 
            ln -s key ${SUBNAME}.${DOMAIN}.key
        done
 ```
+
 **Copy the generated certificates
 
 ```
@@ -258,7 +291,9 @@ While there are certainly many ways to get started hacking desec-stack, here is 
     However, we ship `.env.default` and `.env.dev` with templates for production and development, respectively.
     `.env.dev` is almost good enough for a basic development system, so let's use that as a basis:
 
-       sed "s/^DESECSTACK_DOMAIN=.*/DESECSTACK_DOMAIN=${DOMAIN}/" .env.dev > .env
+```
+sed "s/^DESECSTACK_DOMAIN=.*/DESECSTACK_DOMAIN=${DOMAIN}/" .env.dev > .env
+```
 
     Optionally, edit the file and
     1. configure an email server host name, username, and password to deliver emails can be included in `.env`. A convenient option is a MailTrap account.
@@ -268,81 +303,110 @@ While there are certainly many ways to get started hacking desec-stack, here is 
     To generate the PSK, use the openvpn-server container:
 
 ```
-        docker compose build openvpn-server && docker compose run openvpn-server openvpn --genkey secret /dev/stdout > openvpn-server/secrets/ta.key
+docker compose build openvpn-server && docker compose run openvpn-server openvpn --genkey secret /dev/stdout > openvpn-server/secrets/ta.key
 ```
     To build the PKI, we recommend [easy RSA](https://github.com/OpenVPN/easy-rsa).
     **Please note that PKI instructions here are for development deployments only!**
     **Using this setup for production WILL DEFINITELY result in an INSECURE deployment!**
     To make it available, clone the repository and link to the executable:
 
-        cd openvpn-server/secrets
-        git clone https://github.com/OpenVPN/easy-rsa.git
-        ln -s easy-rsa/easyrsa3/easyrsa
+```
+cd openvpn-server/secrets
+git clone https://github.com/OpenVPN/easy-rsa.git
+ln -s easy-rsa/easyrsa3/easyrsa
+```
 
-    In order to create a new PKI,
+** In order to create a new PKI,
 
-        ./easyrsa init-pki
-        ./easyrsa build-ca nopass
+```
+./easyrsa init-pki
+./easyrsa build-ca nopass
+```
 
-    To make the new PKI's Certificate Authority available to the OpenVPN server,
+To make the new PKI's Certificate Authority available to the OpenVPN server,
 
-        ln -s pki/ca.crt
+```
+ln -s pki/ca.crt
+```
 
-    To issue a certificate for the OpenVPN server, generate a new key pair, a signing request, and sign the certificate.
+To issue a certificate for the OpenVPN server, generate a new key pair, a signing request, and sign the certificate.
 
-         ./easyrsa gen-req server nopass
-         ./easyrsa sign-req server server  # requires interaction
+```
+./easyrsa gen-req server nopass
+./easyrsa sign-req server server  # requires interaction
+```
 
-    Make the key and certificate available to OpenVPN server:
+Make the key and certificate available to OpenVPN server:
 
-        ln -s pki/issued/server.crt
-        ln -s pki/private/server.key
+```
+ln -s pki/issued/server.crt
+ln -s pki/private/server.key
+```
 
-    As the setup of OpenVPN is completed, return to the project directory:
+As the setup of OpenVPN is completed, return to the project directory:
 
-        cd -
+```
+cd ~/desec-stack
+```
 
 1. **Install webapp dependencies.** To install the dependencies for the web site and GUI, run
 
-       cd webapp/
-       npm install
-       cd -
+```
+cd webapp/www
+npm install
+cd ~/desec-stack
+```
 
 1. **Run desec-stack.** To run desec-stack, use
 
-       ./dev
+```
+./dev
+```
 
-    If you run desec-stack for the first time, this will require a couple of downloads and take a while.
-    Once it is up and running, you can query the API home endpoint:
+If you run desec-stack for the first time, this will require a couple of downloads and take a while.
+Once it is up and running, you can query the API home endpoint:
 
-       http GET https://desec.${DOMAIN}/api/v1/
+```
+ http GET https://desec.${DOMAIN}/api/v1/
+ ```
 
-    Congratulations, you have desec-stack up and running.
+ Congratulations, you have desec-stack up and running.
 
-    A convenient way to create a test user account is via
+ A convenient way to create a test user account is via
 
-       docker compose exec api python3 manage.py shell -c 'from desecapi.models import User; User.objects.create_user(email="test@example.com", password="test1234");'
+```
+docker compose exec api python3 manage.py shell -c 'from desecapi.models import User; User.objects.create_user(email="test@example.com", password="test1234");'
+```
 
-    but users can also be created by signing up via the web GUI.
-    The latter, however, requires that you can read email that is sent from your local setup.
-    This can be achieved, e.g., by using mailtrap.io.
+but users can also be created by signing up via the web GUI.
+The latter, however, requires that you can read email that is sent from your local setup.
+This can be achieved, e.g., by using mailtrap.io.
 
-    Of course, as this setup is only on your local machine, DNS information will not be published into the public DNS.
-    However, the desec-stack nameserver is available on localhost port 5321.
-    To check if desec-stack is working as expected, you can query the desec-stack nameserver locally for any information that you saved using your API.
+Of course, as this setup is only on your local machine, DNS information will not be published into the public DNS.
+However, the desec-stack nameserver is available on localhost port 5321.
 
-       EMAIL=john@example.com
-       PASSWORD=insecure
-       # Register account (https://desec.readthedocs.io/en/latest/quickstart.html). Hint: In dev mode, the captcha response contains the plaintext challenge.
-       TOKEN=$(http POST https://desec.${DOMAIN}/api/v1/auth/login/ email:=\"${EMAIL}\" password:=\"${PASSWORD}\" | jq -r .token)
-       http POST https://desec.${DOMAIN}/api/v1/domains/ Authorization:"Token ${TOKEN}" name:='"test.example"'
-       http POST https://desec.${DOMAIN}/api/v1/domains/test.example/rrsets/ Authorization:"Token ${TOKEN}" type:=\"A\" ttl:=60 records:='["127.0.0.254"]'
+To check if desec-stack is working as expected, you can query the desec-stack nameserver locally for any information that you saved using your API.
+
+```
+EMAIL=john@example.com
+PASSWORD=insecure
+```
+
+# Register account (https://desec.readthedocs.io/en/latest/quickstart.html). Hint: In dev mode, the captcha response contains the plaintext challenge.
+
+```
+TOKEN=$(http POST https://desec.${DOMAIN}/api/v1/auth/login/ email:=\"${EMAIL}\" password:=\"${PASSWORD}\" | jq -r .token)
+http POST https://desec.${DOMAIN}/api/v1/domains/ Authorization:"Token ${TOKEN}" name:='"test.example"'
+http POST https://desec.${DOMAIN}/api/v1/domains/test.example/rrsets/ Authorization:"Token ${TOKEN}" type:=\"A\" ttl:=60 records:='["127.0.0.254"]'
+```
 
     After registering a user with your API, creating a domain and publishing some info to the DNS, use
 
-       dig @localhost -p 5321 test.example 
+```
+dig @localhost -p 5321 test.example 
+```
 
-    to see if the nameserver is behaving as expected.
+to see if the nameserver is behaving as expected.
 
 1. **(Optional) Configure PyCharm for API Development.** As a docker compose application, desec-stack takes a while to start.
     Additionally, it is hard to connect a debugger to the docker containers.
@@ -353,40 +417,52 @@ While there are certainly many ways to get started hacking desec-stack, here is 
     1. To get started, we create a virtual python environment that (to some extent) mimics the python environment in the docker container.
         In the project root,
 
+           ```
            cd api
            python3 -m venv venv  # Python >= 3.12
            source venv/bin/activate
            pip install wheel
            pip install -r requirements.txt
+           ```
 
     1. At this point, Django is ready to run in the virtual environment created above.
         There are two things to consider when running Django outside the container.
         First, the environment variables as defined in the `.env` file need to be made available in the shell.
         This can be done with
 
+          ```
            set -a && source ../.env && set +a
+          ```
 
         Second, to make the tests run efficiently, a couple of settings are different from the production system:
         passwords are hashed using a fast (but insecure!) method, rate limits are switched off, and so on.
         To use the fast settings in your shell, run
 
+          ```            
            export DJANGO_SETTINGS_MODULE=api.settings_quick_test
+          ```
 
         Third, the API needs a postgres database to run the tests. To serve as a test database,
         the `dbapi` container can be started using a test configuration which exposes the database at
         `127.0.0.1`. In order to let Django know that the database is at `127.0.0.1` instead of the
         usual `dbapi`, set an additional environment variable:
 
+           ```
            export DESECSTACK_DJANGO_TEST=1
+           ```
 
         Fourth, run the database:
 
+          ```
            docker compose -f docker-compose.yml -f docker-compose.test-api.yml up -d dbapi
+          ```
 
         Finally, you can manage Django using the `manage.py` CLI.
         As an example, to run the tests, use
 
+          ```
            python3 manage.py test
+          ```
 
     1. Open the project root directory `desec-stack` in PyCharm and select File › Settings.
         1. In Project: desec-stack › Project Structure, mark the `api/` folder as a source folder.
@@ -406,8 +482,9 @@ While there are certainly many ways to get started hacking desec-stack, here is 
        (Note that the first attempt may fail in case the `dbapi` container does not start up fast enough. In that case, just try again.)
 
     1. To use code inspection, click on Inspect Code… in PyCharm's Code menu and add a local custom scope with the following pattern:
-
+          ```
            file:api//*.py&&!file:api/venv//*&&!file:api/manage.py&&!file:api/api/wsgi.py&&!file:api/desecapi/migrations//*
+          ```
 
     From this point on, you are set up to use most of PyCharm's convenience features.
 
