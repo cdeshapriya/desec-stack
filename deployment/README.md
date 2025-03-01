@@ -56,66 +56,89 @@ Although most configurations are stored in this repository, some external needs 
       sudo systemctl restart docker
       ```
 
-3.  Also, configure certificates for `openvpn-server`:
+## Setup Environment Variable for Production Setup
+
+1.  Set sensitive information and network topology using environment variables or an `.env` file. You need (you can use the `.env.default` file as a template):
+
+    You can use the following command
      
-    - [Get easy-rsa](https://github.com/OpenVPN/easy-rsa) and follow [this tutorial](https://github.com/OpenVPN/easy-rsa/blob/master/README.quickstart.md).
-  
-    - Create 
-    
-- Then, copy `ca.crt`, `server.crt`, and `server.key` to `openvpn-server/secrets/`.
-    - Create a pre-shared secret using `openvpn --genkey --secret ta.key` inside `openvpn-server/secrets/`.
+    ```
+    cp .env.default .env
+    ```
 
-For provisioning a secondary, use the same `easy-rsa` PKI and create a new `client.key` and `client.crt` pair. Transfer these securely onto the secondary, along with `ca.crt` and `ta.key`.
-(You can also create the key on the secondary and only transfer a certificate signing request and the certificate.)
-
-4.  Set sensitive information and network topology using environment variables or an `.env` file. You need (you can use the `.env.default` file as a template):
+ 2. Description of environment variable
    
     -  **Global Configuration**
     
-      - `DESECSTACK_DOMAIN`: domain name under which the entire system will be running. The API will be reachable at https://desec.$DESECSTACK_DOMAIN/api/. For development setup, we recommend using `yourname.dedyn.io`
+       - `DESECSTACK_DOMAIN`: domain name under which the entire system will be running. The API will be reachable at https://desec.$DESECSTACK_DOMAIN/api/. For development setup, we recommend using `yourname.dedyn.io` and for a production environment we use `idp.cyber.lk` 
    
-       - `DESECSTACK_NS`: the names of the authoritative name servers, i.e. names pointing to your secondary name servers. Minimum 2.
+       - `DESECSTACK_NS`: the names of the authoritative name servers, i.e. names pointing to your secondary name servers. Minimum 2. For the production, we use the following two nameserver hosts. You can select your production as per your project.
+     
+          ```
+          ns1.idns.cyber.lk
+          ```
 
-    - network
+          and
+
+          ```
+          ns2.idns.cyber.lk
+          ```
+          
+     
+         
+
+    -  **Network**
       
-      - `DESECSTACK_IPV4_REAR_PREFIX16`: IPv4 net, size /16, for assignment of internal container IPv4 addresses. **NOTE:** If you change this in an existing setup, you 
-        need to manually update persisted data structures such as the MySQL grant tables! Better don't do it.
-      - `DESECSTACK_IPV6_SUBNET`: IPv6 net, ideally /80 (see below)
-      - `DESECSTACK_IPV6_ADDRESS`: IPv6 address of frontend container, ideally 0642:ac10:0080 in within the above subnet (see below)
-      - `DESECSTACK_PORT_XFR`: Port over which XFRs are performed with secondaries
-    - certificates
-      - `DESECSTACK_WWW_CERTS`: `./path/to/certificates` for `www` container. This directory is monitored for changes so that nginx can reload when new keys/certificates are provided. **Note:** The reload is done any time something changes in the directory. The relevant files are **not** watched individually.
+       - `DESECSTACK_IPV4_REAR_PREFIX16`: IPv4 net, size /16, for assignment of internal container IPv4 addresses. **NOTE:** If you change this in an existing setup, you 
+          need to manually update persisted data structures such as the MySQL grant tables! Better don't do it.
+       - `DESECSTACK_IPV6_SUBNET`: IPv6 net, ideally /80 (see below)
+       - `DESECSTACK_IPV6_ADDRESS`: IPv6 address of frontend container, ideally 0642:ac10:0080 in within the above subnet (see below)
+       - `DESECSTACK_PORT_XFR`: Port over which XFRs are performed with secondaries
+         
+     -  **Letsencrypt certificates**
+
+        - `DESECSTACK_WWW_CERTS`:./certs` for `www` container. This directory is monitored for changes so that nginx can reload when new keys/certificates are provided.
+
+        - **Note:**
+
+            The reload is done any time something changes in the directory. The relevant files are **not** watched individually.
         
-    - API-related
-      - `DESECSTACK_API_ADMIN`: white-space separated list of Django admin email addresses
-      - `DESECSTACK_API_AUTHACTION_VALIDITY`: number of hours for which authenticated action links (e.g. email verification) should be considered valid (default: 0)
-      - `DESECSTACK_API_DEBUG`: Django debug setting. Must be True (default in `docker-compose.dev.yml`) or False (default otherwise)
-      - `DESECSTACK_API_SEPA_CREDITOR_ID`: SEPA creditor ID for donations
-      - `DESECSTACK_API_EMAIL_HOST`: when sending email, use this mail server
-      - `DESECSTACK_API_EMAIL_HOST_USER`: username for sending email
-      - `DESECSTACK_API_EMAIL_HOST_PASSWORD`: password for sending email
-      - `DESECSTACK_API_EMAIL_PORT`: port for sending email
-      - `DESECSTACK_API_SECRETKEY`: Django secret
-      - `DESECSTACK_API_PSL_RESOLVER`: Resolver IP address to use for PSL lookups. If empty, the system's default resolver is used.
-      - `DESECSTACK_DBAPI_PASSWORD_desec`: database password for desecapi
-      - `DESECSTACK_MINIMUM_TTL_DEFAULT`: minimum TTL users can set for RRsets. The setting is per domain, and the default defined here is used on domain creation.
+     - **API-related configuration**
+       
+       - `DESECSTACK_API_ADMIN`: white-space separated list of Django admin email addresses
+       - `DESECSTACK_API_AUTHACTION_VALIDITY`: number of hours for which authenticated action links (e.g. email verification) should be considered valid (default: 0)
+       - `DESECSTACK_API_DEBUG`: Django debug setting. Must be True (default in `docker-compose.dev.yml`) or False (default otherwise)
+       - `DESECSTACK_API_SEPA_CREDITOR_ID`: SEPA creditor ID for donations
+       - `DESECSTACK_API_EMAIL_HOST`: when sending email, use this mail server
+       - `DESECSTACK_API_EMAIL_HOST_USER`: username for sending email
+       - `DESECSTACK_API_EMAIL_HOST_PASSWORD`: password for sending email
+       - `DESECSTACK_API_EMAIL_PORT`: port for sending email
+       - `DESECSTACK_API_SECRETKEY`: Django secret
+       - `DESECSTACK_API_PSL_RESOLVER`: Resolver IP address to use for PSL lookups. If empty, the system's default resolver is used.
+       - `DESECSTACK_DBAPI_PASSWORD_desec`: database password for desecapi
+       - `DESECSTACK_MINIMUM_TTL_DEFAULT`: minimum TTL users can set for RRsets. The setting is per domain, and the default defined here is used on domain creation.
    
-    - nslord-related
-      - `DESECSTACK_DBLORD_PASSWORD_pdns`: mysql password for pdns on nslord
-      - `DESECSTACK_NSLORD_APIKEY`: pdns API key on nslord
-      - `DESECSTACK_NSLORD_CARBONSERVER`: pdns `carbon-server` setting on nslord (optional)
-      - `DESECSTACK_NSLORD_CARBONOURNAME`: pdns `carbon-ourname` setting on nslord (optional)
-      - `DESECSTACK_NSLORD_DEFAULT_TTL`: TTL to use by default, including for default NS records
-    - nsmaster-related
-      - `DESECSTACK_DBMASTER_PASSWORD_pdns`: mysql password for pdns on nsmaster
-      - `DESECSTACK_NSMASTER_ALSO_NOTIFY`: Comma-separated list of additional IP addresses to notify of zone updates
-      - `DESECSTACK_NSMASTER_APIKEY`: pdns API key on nsmaster (required so that we can execute zone deletions on nsmaster, which replicates to the secondaries)
-      - `DESECSTACK_NSMASTER_CARBONSERVER`: pdns `carbon-server` setting on nsmaster (optional)
-      - `DESECSTACK_NSMASTER_CARBONOURNAME`: pdns `carbon-ourname` setting on nsmaster (optional)
-      - `DESECSTACK_NSMASTER_TSIGKEY`: Base64-encoded value of the default TSIG key used for talking to external secondaries (algorithm: HMAC-SHA256)
-    - monitoring-related
-      - `DESECSTACK_WATCHDOG_SECONDARIES`: space-separated list of secondary hostnames; used to check correct replication of recent DNS changes
-      - `DESECSTACK_PROMETHEUS_PASSWORD`: basic auth password for user `prometheus` at `https://${DESECSTACK_DOMAIN}/prometheus/`
+     - **`nslord` related configurations**
+       
+       - `DESECSTACK_DBLORD_PASSWORD_pdns`: mysql password for pdns on nslord
+       - `DESECSTACK_NSLORD_APIKEY`: pdns API key on nslord
+       - `DESECSTACK_NSLORD_CARBONSERVER`: pdns `carbon-server` setting on nslord (optional)
+       - `DESECSTACK_NSLORD_CARBONOURNAME`: pdns `carbon-ourname` setting on nslord (optional)
+       - `DESECSTACK_NSLORD_DEFAULT_TTL`: TTL to use by default, including for default NS records
+         
+     - **`nsmaster` related configuration**
+      
+       - `DESECSTACK_DBMASTER_PASSWORD_pdns`: mysql password for pdns on nsmaster
+       - `DESECSTACK_NSMASTER_ALSO_NOTIFY`: Comma-separated list of additional IP addresses to notify of zone updates
+       - `DESECSTACK_NSMASTER_APIKEY`: pdns API key on nsmaster (required so that we can execute zone deletions on nsmaster, which replicates to the secondaries)
+       - `DESECSTACK_NSMASTER_CARBONSERVER`: pdns `carbon-server` setting on nsmaster (optional)
+       - `DESECSTACK_NSMASTER_CARBONOURNAME`: pdns `carbon-ourname` setting on nsmaster (optional)
+       - `DESECSTACK_NSMASTER_TSIGKEY`: Base64-encoded value of the default TSIG key used for talking to external secondaries (algorithm: HMAC-SHA256)
+       - 
+     - **Monitoring related configuration**
+       
+       - `DESECSTACK_WATCHDOG_SECONDARIES`: space-separated list of secondary hostnames; used to check correct replication of recent DNS changes
+       - `DESECSTACK_PROMETHEUS_PASSWORD`: basic auth password for user `prometheus` at `https://${DESECSTACK_DOMAIN}/prometheus/`
 
 
 Storage
@@ -347,6 +370,10 @@ Make the key and certificate available to OpenVPN server:
 ln -s pki/issued/server.crt
 ln -s pki/private/server.key
 ```
+
+For provisioning a secondary, use the same `easy-rsa` PKI and create a new `client.key` and `client.crt` pair. Transfer these securely onto the secondary, along with `ca.crt` and `ta.key`.
+(You can also create the key on the secondary and only transfer a certificate signing request and the certificate.)
+
 
 As the setup of OpenVPN is completed, return to the project directory:
 
