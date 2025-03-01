@@ -141,7 +141,7 @@ While there are certainly many ways to get started hacking desec-stack, here is 
     jq, httpie, libmariadb-dev, libpq-dev, python3-dev (>= 3.12) and python3-venv (>= 3.12) are useful if you want to follow this guide.
     The webapp requires Node.js. To install everything you need for this guide except docker and docker compose, use
 
-       sudo apt install certbot curl git httpie jq libmariadbclient-dev libpq-dev nodejs npm python3-dev python3-venv libmemcached-dev
+       sudo apt install certbot curl git httpie jq libmariadb-dev libpq-dev nodejs npm python3-dev python3-venv libmemcached-dev
 
 1. **Get the code.** Clone this repository to your favorite location.
 
@@ -192,7 +192,7 @@ While there are certainly many ways to get started hacking desec-stack, here is 
        echo DEDYN_NAME=${DOMAIN} >> .dedynauth
        chmod +x desec_certbot_hook.sh
 
-    Now we use certbot to obtain certificates, using the DNS challenge for authentication.
+    Now we use `certbot` to obtain certificates, using the DNS challenge for authentication. Your current directory should be `~/bin`
 
        certbot \
            --config-dir certbot/config --logs-dir certbot/logs --work-dir certbot/work \
@@ -210,6 +210,8 @@ While there are certainly many ways to get started hacking desec-stack, here is 
     To make them available to desec-stack (in the default location), we copy certificate and keys.
     In the project root directory,
 
+   ```
+       cd ~/desec-stack
        mkdir certs
        cd certs
        for SUBNAME in desec www.desec get.desec checkip.dedyn checkipv4.dedyn checkipv6.dedyn dedyn www.dedyn update.dedyn update6.dedyn
@@ -217,9 +219,13 @@ While there are certainly many ways to get started hacking desec-stack, here is 
            ln -s cer ${SUBNAME}.${DOMAIN}.cer
            ln -s key ${SUBNAME}.${DOMAIN}.key
        done
+```
+**Copy the generated certificates
 
+```
        cp ~/bin/certbot/config/live/${DOMAIN}/fullchain.pem cer
        cp ~/bin/certbot/config/live/${DOMAIN}/privkey.pem key
+```
 
     The last two steps need to be repeated whenever the certificates are renewed.
     While any location for the certificates is fine, the `certs/` folder is configured to be ignored by git so that private keys do not accidentally end up being committed.
@@ -238,8 +244,9 @@ While there are certainly many ways to get started hacking desec-stack, here is 
     Additionally, the VPN server for the replication network needs to be equipped with a pre-shared key (PSK) and a public key infrastructure (PKI).
     To generate the PSK, use the openvpn-server container:
 
-        docker compose build openvpn-server && docker compose run openvpn-server openvpn --genkey --secret /dev/stdout > openvpn-server/secrets/ta.key
-
+```
+        docker compose build openvpn-server && docker compose run openvpn-server openvpn --genkey secret /dev/stdout > openvpn-server/secrets/ta.key
+```
     To build the PKI, we recommend [easy RSA](https://github.com/OpenVPN/easy-rsa).
     **Please note that PKI instructions here are for development deployments only!**
     **Using this setup for production WILL DEFINITELY result in an INSECURE deployment!**
