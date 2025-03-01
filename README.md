@@ -33,28 +33,28 @@ Although most configurations are stored in this repository, some external needs 
 
 1.  We run this software with the `--userland-proxy=false` flag of the `dockerd` daemon, and recommend you do the same.
 
-    Disabling the Userland proxy constitutes a global setting, established at the daemon level. This configuration cannot be     altered from the client, and hence not via Docker Compose.
+    - Disabling the Userland proxy constitutes a global setting, established at the daemon level. This configuration cannot be     altered from the client, and hence not via Docker Compose.
 
-    To disable the proxy, you must modify the daemon configuration (according to the `dockerd` documentation). Execute the following steps on the host where the daemon operates:
+    - To disable the proxy, you must modify the daemon configuration (according to the `dockerd` documentation). Execute the following steps on the host where the daemon operates:
 
-    Establish a file titled `/etc/docker/daemon.json` if it is absent, and incorporate the "userland-proxy": false configuration. The daemon.json file must be valid JSON; if this is the sole configuration within that file, it should seem as follows:
+    - Establish a file titled `/etc/docker/daemon.json` if it is absent, and incorporate the "userland-proxy": false configuration. The daemon.json file must be valid JSON; if this is the sole configuration within that file, it should seem as follows:
 
-    ```
-    sudo nano /etc/docker/daemon.json
-    ```
+      ```
+      sudo nano /etc/docker/daemon.json
+      ```
 
-     Add the following configuration
+      Add the following configuration
 
-    ```
-    {
-       "userland-proxy": false
-    }
-    ```
-    Upon saving the file, restart the daemon using the following command, provided your host employs systemd;
+      ```
+      {
+         "userland-proxy": false
+      }
+      ```
+    - Upon saving the file, restart the daemon using the following command, provided your host employs systemd;
 
-    ```
-    sudo systemctl restart docker
-    ```
+      ```
+      sudo systemctl restart docker
+      ```
 
 3.  Also, configure certificates for `openvpn-server`:
      
