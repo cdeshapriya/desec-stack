@@ -31,9 +31,9 @@ This is a docker compose application providing the basic stack for deSEC name se
 
 Although most configurations are stored in this repository, some external needs must be met before the application can be executed. The dependencies are:
 
-1.  We run this software with the `--userland-proxy=false` flag of the `dockerd` daemon, and recommend you do the same.
+1.  We run this software with the `--userland-proxy=false` flag of the `dockerd` daemon and recommend you do the same.
 
-    - Disabling the Userland proxy constitutes a global setting, established at the daemon level. This configuration cannot be     altered from the client, and hence not via Docker Compose.
+    - Disabling the Userland proxy constitutes a global setting, established at the daemon level. This configuration cannot be     altered by the client, and hence not via Docker Compose.
 
     - To disable the proxy, you must modify the daemon configuration (according to the `dockerd` documentation). Execute the following steps on the host where the daemon operates:
 
@@ -82,9 +82,8 @@ Although most configurations are stored in this repository, some external needs 
 
           ```
           ns2.idns.cyber.lk
-          ```
-          
-     
+          ```    
+   
          
 
     -  **Network**
