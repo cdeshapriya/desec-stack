@@ -117,20 +117,6 @@ For provisioning a secondary, use the same `easy-rsa` PKI and create a new `clie
       - `DESECSTACK_WATCHDOG_SECONDARIES`: space-separated list of secondary hostnames; used to check correct replication of recent DNS changes
       - `DESECSTACK_PROMETHEUS_PASSWORD`: basic auth password for user `prometheus` at `https://${DESECSTACK_DOMAIN}/prometheus/`
 
-How to Run
-----------
-
-Development:
-
-```
-$ ./dev
-```
-
-Production:
-
-```
-$ docker compose build && docker compose up
-```
 
 Storage
 -------
