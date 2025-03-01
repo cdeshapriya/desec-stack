@@ -21,7 +21,30 @@ Although most configuration is contained in this repository, some external depen
 
 1.  We run this software with the `--userland-proxy=false` flag of the `dockerd` daemon, and recommend you do the same.
 
-2.  Also, configure certificates for `openvpn-server`:
+     Disabling the Userland proxy constitutes a global setting, established at the daemon level. This configuration cannot be     altered from the client, and hence not via Docker Compose.
+
+To disable the proxy, you must modify the daemon configuration (according to the dockerd documentation). Execute the following steps on the host where the daemon operates:
+
+Establish a file titled /etc/docker/daemon.json if it is absent, and incorporate the "userland-proxy": false configuration. The daemon.json file must be valid JSON; if this is the sole configuration within that file, it should seem as follows:
+
+```
+sudo nano /etc/docker/daemon.json
+```
+
+Add the following configuration
+
+```
+{
+    "userland-proxy": false
+}
+```
+Upon saving the file, restart the daemon using the following command, provided your host employs systemd;
+
+```
+sudo systemctl restart docker
+```
+
+3.  Also, configure certificates for `openvpn-server`:
 
     - [Get easy-rsa](https://github.com/OpenVPN/easy-rsa) and follow [this tutorial](https://github.com/OpenVPN/easy-rsa/blob/master/README.quickstart.md).
     - Then, copy `ca.crt`, `server.crt`, and `server.key` to `openvpn-server/secrets/`.
@@ -30,7 +53,7 @@ Although most configuration is contained in this repository, some external depen
     For provisioning a secondary, use the same `easy-rsa` PKI and create a new `client.key` and `client.crt` pair. Transfer these securely onto the secondary, along with `ca.crt` and `ta.key`.
     (You can also create the key on the secondary and only transfer a certificate signing request and the certificate.)
 
-3.  Set sensitive information and network topology using environment variables or an `.env` file. You need (you can use the `.env.default` file as a template):
+4.  Set sensitive information and network topology using environment variables or an `.env` file. You need (you can use the `.env.default` file as a template):
     - global
       - `DESECSTACK_DOMAIN`: domain name under which the entire system will be running. The API will be reachable at https://desec.$DESECSTACK_DOMAIN/api/. For development setup, we recommend using `yourname.dedyn.io`
       - `DESECSTACK_NS`: the names of the authoritative name servers, i.e. names pointing to your secondary name servers. Minimum 2.
