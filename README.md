@@ -168,6 +168,7 @@ Development: Getting Started Guide
 ----------------------------------
 
 As desec-stack utilizes a number of different technologies and software packages, it requires some effort to setup a stack ready for development.
+
 While there are certainly many ways to get started hacking desec-stack, here is one way to do it.
 
 1. **Requirements.** This guide is intended and tested on Ubuntu 22.04 LTS.
@@ -184,7 +185,9 @@ sudo apt install certbot curl git httpie jq libmariadb-dev libpq-dev nodejs npm 
 
 1. **Get the code.** Clone this repository to your favorite location.
 
+```
        git clone git@github.com:desec-io/desec-stack.git
+```
 
 2. **Obtain Domain Names.** To run desec-stack, this guide uses a subdomain of dedyn.io provided by desec.io.
 
@@ -196,7 +199,8 @@ sudo apt install certbot curl git httpie jq libmariadb-dev libpq-dev nodejs npm 
 
 ```
 export DOMAIN=example.dedyn.io
-```     
+```
+     
 ```
 http POST https://desec.io/api/v1/domains/ Authorization:"Token ${TOKEN}" name:='"'${DOMAIN}'"'
 ```
