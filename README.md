@@ -57,8 +57,10 @@ Although most configurations are stored in this repository, some external needs 
     ```
 
 3.  Also, configure certificates for `openvpn-server`:
-
-- [Get easy-rsa](https://github.com/OpenVPN/easy-rsa) and follow [this tutorial](https://github.com/OpenVPN/easy-rsa/blob/master/README.quickstart.md).
+     
+    - [Get easy-rsa](https://github.com/OpenVPN/easy-rsa) and follow [this tutorial](https://github.com/OpenVPN/easy-rsa/blob/master/README.quickstart.md).
+  
+    - Create 
     
 - Then, copy `ca.crt`, `server.crt`, and `server.key` to `openvpn-server/secrets/`.
     - Create a pre-shared secret using `openvpn --genkey --secret ta.key` inside `openvpn-server/secrets/`.
@@ -68,7 +70,7 @@ For provisioning a secondary, use the same `easy-rsa` PKI and create a new `clie
 
 4.  Set sensitive information and network topology using environment variables or an `.env` file. You need (you can use the `.env.default` file as a template):
    
-    - global
+    - ** Global Configuration
     
       - `DESECSTACK_DOMAIN`: domain name under which the entire system will be running. The API will be reachable at https://desec.$DESECSTACK_DOMAIN/api/. For development setup, we recommend using `yourname.dedyn.io`
    
