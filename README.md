@@ -22,7 +22,7 @@ Requirements
 ```
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
-``
+```
 
 Although most configuration is contained in this repository, some external dependencies need to be met before the application can be run. Dependencies are:
 
