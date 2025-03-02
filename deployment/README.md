@@ -1,16 +1,25 @@
 # deSEC Stack
 
-This is a docker compose application providing the basic stack for deSEC name services. It consists of the following major components.
+This docker compose application provides the basic stack for deSEC name services. It consists of the following major components.
 
 - `nslord`: Eventually authoritative DNS server (PowerDNS). DNSSEC keying material is generated here.
+  
 - `nsmaster`: Stealth authoritative DNS server (PowerDNS). Receives fully signed AXFR zone transfers from `nslord`. No access to keys.
+  
 - `api`: RESTful API to create deSEC users and domains, see [documentation](https://desec.readthedocs.io/).
+
 - `dbapi`, `dblord`, `dbmaster`: Postgres databases for `api` and `nsmaster`, MariaDB database for `nslord`, respectively.
+
 - `www`: nginx instance serving static website content and proxying to `api`
+
 - `celery`: A shadow instance of the `api` code for performing asynchronous tasks (email delivery).
+
 - `rabbitmq`: `celery`'s queue
-- `memcached`: `api`-wide in-memory cache, currently used to keep API throttling state
+
+- `memcached`: `api` wide in-memory cache, currently used to keep API throttling state
+
 - `openvpn-server`: OpenVPN server used to tunnel replication traffic between this stack and frontend DNS secondaries
+
 - `prometheus`: Prometheus server for monitoring
 
 ## Requirements
@@ -33,11 +42,11 @@ Although most configurations are stored in this repository, some external needs 
 
 1.  We run this software with the `--userland-proxy=false` flag of the `dockerd` daemon and recommend you do the same.
 
-    - Disabling the Userland proxy constitutes a global setting, established at the daemon level. This configuration cannot be     altered by the client, and hence not via Docker Compose.
+    - Disabling the Userland proxy constitutes a global setting, established at the daemon level. The client cannot alter this configuration, and hence not via Docker Compose.
 
-    - To disable the proxy, you must modify the daemon configuration (according to the `dockerd` documentation). Execute the following steps on the host where the daemon operates:
+    - To disable the proxy, you must modify the daemon configuration (according to the `dockerd` documentation). Execute the following steps on the host where the docker daemon runs:
 
-    - Establish a file titled `/etc/docker/daemon.json` if it is absent, and incorporate the "userland-proxy": false configuration. The daemon.json file must be valid JSON; if this is the sole configuration within that file, it should seem as follows:
+    - Create the file  `/etc/docker/daemon.json` if it is absent, and incorporate the `"userland-proxy": false` configuration. The daemon.json file must be valid JSON; if this is the sole configuration within that file, it should seem as follows:
 
       ```
       sudo nano /etc/docker/daemon.json
@@ -58,7 +67,7 @@ Although most configurations are stored in this repository, some external needs 
 
 ## Setup Environment Variable for Production Setup
 
-1.  Set sensitive information and network topology using environment variables or an `.env` file. You need (you can use the `.env.default` file as a template):
+1.  Set sensitive information and network topology using environment variables or a `.env` file. You need (you can use the `.env.default` file as a template):
 
     You can use the following command
      
@@ -70,9 +79,9 @@ Although most configurations are stored in this repository, some external needs 
    
     -  **Global Configuration**
     
-       - `DESECSTACK_DOMAIN`: domain name under which the entire system will be running. The API will be reachable at https://desec.$DESECSTACK_DOMAIN/api/. For development setup, we recommend using `yourname.dedyn.io` and for a production environment we use `idp.cyber.lk` 
+       - `DESECSTACK_DOMAIN`: domain name under which the entire system will be running. The API will be reachable at `https://desec.$DESECSTACK_DOMAIN/api/`. For development setup, we recommend using `yourname.dedyn.io` and for a production environment we use `idns.cyber.lk` 
    
-       - `DESECSTACK_NS`: the names of the authoritative name servers, i.e. names pointing to your secondary name servers. Minimum 2. For the production, we use the following two nameserver hosts. You can select your production as per your project.
+       - `DESECSTACK_NS`: the names of the authoritative name servers, i.e. names pointing to your secondary name servers. We require a minimum of 2. For the production, we use the following two nameserver hosts. You can select your production as per your project.
      
           ```
           ns1.idns.cyber.lk
@@ -83,14 +92,14 @@ Although most configurations are stored in this repository, some external needs 
           ```
           ns2.idns.cyber.lk
           ```    
-   
-         
-
-    -  **Network**
+  -  **Network configuration**
       
-       - `DESECSTACK_IPV4_REAR_PREFIX16`: IPv4 net, size /16, for assignment of internal container IPv4 addresses. **NOTE:** If you change this in an existing setup, you 
-          need to manually update persisted data structures such as the MySQL grant tables! Better don't do it.
+       - `DESECSTACK_IPV4_REAR_PREFIX16`: IPv4 net, size /16, for assignment of internal container IPv4 addresses.
+
+         **NOTE:** If you change this in an existing setup, you need to manually update persisted data structures such as the MySQL grant tables! Better don't do it.
+       
        - `DESECSTACK_IPV6_SUBNET`: IPv6 net, ideally /80 (see below)
+       
        - `DESECSTACK_IPV6_ADDRESS`: IPv6 address of frontend container, ideally 0642:ac10:0080 in within the above subnet (see below)
        - `DESECSTACK_PORT_XFR`: Port over which XFRs are performed with secondaries
          
@@ -98,55 +107,71 @@ Although most configurations are stored in this repository, some external needs 
 
         - `DESECSTACK_WWW_CERTS`:./certs` for `www` container. This directory is monitored for changes so that nginx can reload when new keys/certificates are provided.
 
-        - **Note:**
-
-            The reload is done any time something changes in the directory. The relevant files are **not** watched individually.
+        - **Note:** The reload is done any time something changes in the directory. The relevant files are **not** watched individually.
         
      - **API-related configuration**
        
        - `DESECSTACK_API_ADMIN`: white-space separated list of Django admin email addresses
+
        - `DESECSTACK_API_AUTHACTION_VALIDITY`: number of hours for which authenticated action links (e.g. email verification) should be considered valid (default: 0)
+
        - `DESECSTACK_API_DEBUG`: Django debug setting. Must be True (default in `docker-compose.dev.yml`) or False (default otherwise)
+
        - `DESECSTACK_API_SEPA_CREDITOR_ID`: SEPA creditor ID for donations
+
        - `DESECSTACK_API_EMAIL_HOST`: when sending email, use this mail server
+
        - `DESECSTACK_API_EMAIL_HOST_USER`: username for sending email
+
        - `DESECSTACK_API_EMAIL_HOST_PASSWORD`: password for sending email
+
        - `DESECSTACK_API_EMAIL_PORT`: port for sending email
+
        - `DESECSTACK_API_SECRETKEY`: Django secret
+
        - `DESECSTACK_API_PSL_RESOLVER`: Resolver IP address to use for PSL lookups. If empty, the system's default resolver is used.
        - `DESECSTACK_DBAPI_PASSWORD_desec`: database password for desecapi
+
        - `DESECSTACK_MINIMUM_TTL_DEFAULT`: minimum TTL users can set for RRsets. The setting is per domain, and the default defined here is used on domain creation.
    
      - **`nslord` related configurations**
        
-       - `DESECSTACK_DBLORD_PASSWORD_pdns`: mysql password for pdns on nslord
+       - `DESECSTACK_DBLORD_PASSWORD_pdns`: MySQL password for pdns on nslord
+
        - `DESECSTACK_NSLORD_APIKEY`: pdns API key on nslord
+
        - `DESECSTACK_NSLORD_CARBONSERVER`: pdns `carbon-server` setting on nslord (optional)
+
        - `DESECSTACK_NSLORD_CARBONOURNAME`: pdns `carbon-ourname` setting on nslord (optional)
+
        - `DESECSTACK_NSLORD_DEFAULT_TTL`: TTL to use by default, including for default NS records
          
      - **`nsmaster` related configuration**
       
-       - `DESECSTACK_DBMASTER_PASSWORD_pdns`: mysql password for pdns on nsmaster
+       - `DESECSTACK_DBMASTER_PASSWORD_pdns`: MySQL password for pdns on nsmaster
+
        - `DESECSTACK_NSMASTER_ALSO_NOTIFY`: Comma-separated list of additional IP addresses to notify of zone updates
+
        - `DESECSTACK_NSMASTER_APIKEY`: pdns API key on nsmaster (required so that we can execute zone deletions on nsmaster, which replicates to the secondaries)
+
        - `DESECSTACK_NSMASTER_CARBONSERVER`: pdns `carbon-server` setting on nsmaster (optional)
+
        - `DESECSTACK_NSMASTER_CARBONOURNAME`: pdns `carbon-ourname` setting on nsmaster (optional)
+
        - `DESECSTACK_NSMASTER_TSIGKEY`: Base64-encoded value of the default TSIG key used for talking to external secondaries (algorithm: HMAC-SHA256)
-       - 
+
+
      - **Monitoring related configuration**
        
        - `DESECSTACK_WATCHDOG_SECONDARIES`: space-separated list of secondary hostnames; used to check correct replication of recent DNS changes
        - `DESECSTACK_PROMETHEUS_PASSWORD`: basic auth password for user `prometheus` at `https://${DESECSTACK_DOMAIN}/prometheus/`
 
+## Storage
 
-Storage
--------
 All important data is stored in the databases managed by the `db*` containers. They use Docker volumes which, by default, reside in `/var/lib/docker/volumes/desec-stack_{dbapi_postgres,dblord_mysql,dbmaster_postgres}`.
 This is the location you will want to back up. (Be sure to follow standard MySQL/Postgres backup practices, i.e. make sure things are consistent.)
 
-API Versions and Roadmap
-------------------------
+## API Versions and Roadmap
 
 deSEC currently maintains the following API versions:
 
@@ -155,42 +180,33 @@ API Version | URL Prefix | Status    | Support Ends
 Version 1   | `/api/v1/` |  stable   | earliest 6 months after v2 is declared stable
 Version 2   | `/api/v2/` |  unstable
 
-You can find our documentation for all API versions at https://desec.readthedocs.io/. (Select the version of interest in the navigation bar.)
+You can find our documentation for all API versions at h`ttps://desec.readthedocs.io/`. (Select the version of interest in the navigation bar.)
 
-Notes on IPv6
--------------
+## Notes on IPv6
 
 This stack is IPv6-capable. Caveats:
 
-- It is not necessary to start the Docker daemon with `--ipv6` or `--fixed-cidr-v6`. However, it is recommended to run `dockerd` with `--userland-proxy=false` to avoid 
-    exposing ports on the host IPv6 address through `docker-proxy`.
+- It is not necessary to start the Docker daemon with `--ipv6` or `--fixed-cidr-v6`. However, it is recommended to run `dockerd` with `--userland-proxy=false` to avoid exposing ports on the host IPv6 address through `docker-proxy`.
 
-- Topology: Assuming 2a01:4f8:a0:12eb::/64 is the host network, and we reserve 2a01:4f8:a0:12eb:deec::/80 for the deSEC stack. Docker has more or less established that 
-    IPv6 addresses be composed of the /80 prefix and the container MAC address. We choose the private 06:42:ac MAC prefix, defining a /104 subnet. For the remaining 24 
-    bits of the MAC and IPv6 address, the convention seems to be to use the last 24 bits from the internally assigned IPv4 address. However, the first 8 of these are 
-    configurable through the `DESECSTACK_IPV4_REAR_PREFIX16` variable. Since we don't want public IPv6 addresses to change if the internal IPv4 net prefix changes, we use 
-    `0x10` for bits at position 24--17. We thus arrive at the subnet 2a01:4f8:a0:12eb:deec:642:ac10:0/108 for our public IPv6-enabled Docker containers. The last 16 bits 
-    of the IPv6 address we indeed take from the internally assigned IP address. The same procedure is used to set the MAC address of IPv6 containers (they begin with 
-    `06:42:ac:10:`).
+- Topology: Assuming 2a01:4f8:a0:12eb::/64 is the host network, and we reserve 2a01:4f8:a0:12eb:deec::/80 for the deSEC stack. Docker has more or less established that IPv6 addresses comprise the` /80 prefix and the container MAC address. We choose the private 06:42:ac MAC prefix, defining a /104 subnet. For the remaining 24 bits of the MAC and IPv6 address, the convention seems to be to use the last 24 bits from the internally assigned IPv4 address. However, the first 8 of these are configurable through the `DESECSTACK_IPV4_REAR_PREFIX16` variable. Since we don't want public IPv6 addresses to change if the internal IPv4 net prefix changes, we use `0x10` for bits at positions 24--17. We thus arrive at the subnet 2a01:4f8:a0:12eb:deec:642:ac10:0/108 for our public IPv6-enabled Docker containers. The last 16 bits of the IPv6 address we indeed take from the internally assigned IP address. The same procedure is used to set the MAC address of IPv6 containers (they begin with `06:42:ac:10:`).
 
-All other traffic in the /80 subnet is unexpected and therefore rejected. This includes traffic for IPv6 addresses that Docker assigns. (If Docker uses the MAC address 
+  All other traffic in the /80 subnet is unexpected and therefore rejected. This includes traffic for IPv6 addresses that Docker assigns. (If Docker uses the MAC address 
 
-For this purpose, the prefix is 02:42:ac which is not part of our public network, so we're safe.)
+  For this purpose, the prefix is 02:42:ac which is not part of our public network, so we're safe.)
 
-Since the above topology is strictly determined by the /80 prefix and the MAC address, we hope that most of the hardcoding can be removed in the future.
+  Since the above topology is strictly determined by the /80 prefix and the MAC address, we hope that most of the hard coding can be removed in the future.
 
   - Docker currently exposes IPv6-capable containers fully, without restriction. Therefore, it is necessary to set up a firewall, like (`ip6tables`)
 
 ```
--A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A FORWARD -m state --state RELATED, ESTABLISHED -j ACCEPT
 -A FORWARD -d 2a01:4f8:a0:12eb:deec:642:ac10:0/108 -i eth0 -j ACCEPT
 -A FORWARD -d 2a01:4f8:a0:12eb:deec::/80 -i eth0 -j REJECT --reject-with icmp6-port-unreachable
 ```
 
-Development: Getting Started Guide
-----------------------------------
+## Development: Getting Started Guide
 
-As desec-stack utilizes a number of different technologies and software packages, it requires some effort to setup a stack ready for development.
+As desec-stack utilizes several different technologies and software packages, it requires some effort to set up a stack ready for development.
 
 While there are certainly many ways to get started hacking desec-stack, here is one way to do it.
 
