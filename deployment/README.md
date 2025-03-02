@@ -164,11 +164,13 @@ Although most configurations are stored in this repository, some external needs 
      - **Monitoring related configuration**
        
        - `DESECSTACK_WATCHDOG_SECONDARIES`: space-separated list of secondary hostnames; used to check correct replication of recent DNS changes
-       - `DESECSTACK_PROMETHEUS_PASSWORD`: basic auth password for user `prometheus` at `https://${DESECSTACK_DOMAIN}/prometheus/`
+
+       - `DESECSTACK_PROMETHEUS_PASSWORD`: basic auth password for user `prometheus` at `https://$desec. {DESECSTACK_DOMAIN}/prometheus/`
 
 ## Storage
 
 All important data is stored in the databases managed by the `db*` containers. They use Docker volumes which, by default, reside in `/var/lib/docker/volumes/desec-stack_{dbapi_postgres,dblord_mysql,dbmaster_postgres}`.
+
 This is the location you will want to back up. (Be sure to follow standard MySQL/Postgres backup practices, i.e. make sure things are consistent.)
 
 ## API Versions and Roadmap
@@ -204,29 +206,35 @@ This stack is IPv6-capable. Caveats:
 -A FORWARD -d 2a01:4f8:a0:12eb:deec::/80 -i eth0 -j REJECT --reject-with icmp6-port-unreachable
 ```
 
-## Development: Getting Started Guide
+## Deployment 
 
-As desec-stack utilizes several different technologies and software packages, it requires some effort to set up a stack ready for development.
+As `desec-stack` utilizes several different technologies and software packages, it requires some effort to set up a stack ready for production deployment.
 
-While there are certainly many ways to get started hacking desec-stack, here is one way to do it.
+1. **Requirements.**
 
-1. **Requirements.** This guide is intended and tested on Ubuntu 22.04 LTS.
-    However, many other Linux distributions will also do fine.
-    For desec-stack, [docker and docker compose v2](https://docs.docker.com/engine/install/ubuntu/) are required.
-    Further tools that are required to start hacking are git and curl.
-    Recommended, but not strictly required for desec-stack development is to use certbot along with Let's Encrypt and PyCharm.
-    jq, httpie, libmariadb-dev, libpq-dev, python3-dev (>= 3.12) and python3-venv (>= 3.12) are useful if you want to follow this guide.
-    The webapp requires Node.js. To install everything you need for this guide except docker and docker compose, use
+    - This guide is intended and tested on Ubuntu 24.04 LTS.
 
-```
-sudo apt install certbot curl git httpie jq libmariadb-dev libpq-dev nodejs npm python3-dev python3-venv libmemcached-dev
-```
+    - However, many other Linux distributions will also do fine.
 
-1. **Get the code.** Clone this repository to your favorite location.
+    - For `desec-stack`, [docker and docker compose v2](https://docs.docker.com/engine/install/ubuntu/) is required.
 
-```
-       git clone git@github.com:desec-io/desec-stack.git
-```
+    - Further tools that are required are `git` and `curl`.
+
+    - We are required to use `certbot` along with Let's Encrypt.
+   
+    - The `webapp` requires `Node.js`. To install everything you need for this guide except docker and docker compose, use
+
+   ```
+   sudo apt install certbot curl git httpie jq nodejs npm python3-dev 
+   ```
+
+1. **Get the code.**
+  
+   Clone this repository to your favorite location.
+
+   ```
+   git clone git@github.com:cdeshapriya/desec-stack.git
+   ```
 
 2. **Obtain Domain Names.** To run desec-stack, this guide uses a subdomain of dedyn.io provided by desec.io.
 
