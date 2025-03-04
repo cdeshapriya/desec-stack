@@ -168,11 +168,9 @@ If email address and password match our records, the server will reply with
 
 As indicated in the response, login tokens expire 7 days after creation or
 when not used for 1 hour, whichever comes first (see :ref:`token object`).
+Expired login tokens are purged on each new login.
 
 In case of credential mismatch, the server returns ``403 Permission Denied``.
-
-**Note:** Every time you send a ``POST`` request to this endpoint, an
-additional token will be created. Existing tokens will *remain valid*.
 
 To authorize subsequent requests with the new token, set the HTTP ``Authorization``
 header to the token's secret value, prefixed with ``Token``::
@@ -206,6 +204,7 @@ A JSON object representing your user account will be returned::
 
     {
         "created": "2019-10-16T18:09:17.715702Z",
+        "domains_under_management": 3,
         "email": "youremailaddress@example.com",
         "id": "9ab16e5c-805d-4ab1-9030-af3f5a541d47",
         "limit_domains": 15,
@@ -218,6 +217,13 @@ Field details:
     :Access mode: read-only
 
     Registration timestamp.
+
+``domains_under_management``
+    :Access mode: read-only
+
+    Number of domains this user can manage, including domains listed in
+    :ref:`token scoping policies` of :ref:`user-override` tokens owned by this
+    account.
 
 ``email``
     :Access mode: read-only
