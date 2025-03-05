@@ -350,42 +350,45 @@ http POST https://desec.io/api/v1/domains/${DOMAIN}/rrsets/ Authorization:"Token
     `.env.dev` is almost good enough for a basic development system, so let's use that as a basis:
 
 ```
-sed "s/^DESECSTACK_DOMAIN=.*/DESECSTACK_DOMAIN=${DOMAIN}/" .env.dev > .env
+cp> .env.default .env
 ```
 
     Optionally, edit the file and
-    1. configure an email server host name, username, and password to deliver emails can be included in `.env`. A convenient option is a MailTrap account.
+    1. Configure an email server hostname, username, and password to deliver emails that can be included in `.env`. A convenient option is a MailTrap account.
     2. adjust the network prefixes in `.env` to avoid collisions with other local networks.
 
     Additionally, the VPN server for the replication network needs to be equipped with a pre-shared key (PSK) and a public key infrastructure (PKI).
     To generate the PSK, use the openvpn-server container:
 
-```
-docker compose build openvpn-server && docker compose run openvpn-server openvpn --genkey secret /dev/stdout > openvpn-server/secrets/ta.key
-```
+    ```
+    mkdir -p ~/desec-stack/openvpn-server/secrets
+    ```
+    ```
+    docker compose build openvpn-server && docker compose run openvpn-server openvpn --genkey secret /dev/stdout > openvpn-server/secrets/ta.key
+    ```
     To build the PKI, we recommend [easy RSA](https://github.com/OpenVPN/easy-rsa).
     **Please note that PKI instructions here are for development deployments only!**
-    **Using this setup for production WILL DEFINITELY result in an INSECURE deployment!**
+    **Using this setup for production WILL result in an INSECURE deployment!**
     To make it available, clone the repository and link to the executable:
 
-```
-cd openvpn-server/secrets
-git clone https://github.com/OpenVPN/easy-rsa.git
-ln -s easy-rsa/easyrsa3/easyrsa
-```
+    ```
+    cd openvpn-server/secrets
+    git clone https://github.com/OpenVPN/easy-rsa.git
+    ln -s easy-rsa/easyrsa3/easyrsa
+   ```
 
-** In order to create a new PKI,
+   **To create a new PKI**
 
-```
-./easyrsa init-pki
-./easyrsa build-ca nopass
-```
+   ```
+   ./easyrsa init-pki
+   ./easyrsa build-ca nopass
+   ```
 
-To make the new PKI's Certificate Authority available to the OpenVPN server,
+   To make the new PKI's Certificate Authority available to the OpenVPN server,
 
-```
-ln -s pki/ca.crt
-```
+   ```
+   ln -s pki/ca.crt
+   ```
 
 To issue a certificate for the OpenVPN server, generate a new key pair, a signing request, and sign the certificate.
 
@@ -419,10 +422,10 @@ npm install
 cd ~/desec-stack
 ```
 
-1. **Run desec-stack.** To run desec-stack, use
+##To build the desec-stack
 
 ```
-./dev
+docker compose build
 ```
 
 If you run desec-stack for the first time, this will require a couple of downloads and take a while.
@@ -437,7 +440,7 @@ Once it is up and running, you can query the API home endpoint:
  A convenient way to create a test user account is via
 
 ```
-docker compose exec api python3 manage.py shell -c 'from desecapi.models import User; User.objects.create_user(email="test@example.com", password="test1234");'
+docker compose exec api python3 manage.py shell -c 'from desecapi.models import User; User.objects.create_user(email=admin@examp, password="test1234");'
 ```
 
 but users can also be created by signing up via the web GUI.
