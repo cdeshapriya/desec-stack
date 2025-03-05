@@ -282,33 +282,42 @@ http POST https://desec.io/api/v1/domains/${DOMAIN}/rrsets/ Authorization:"Token
 
 1. **Obtain certificates.** desec-stack requires SSL certificates for the above-mentioned `desec` and `dedyn` hostnames as well as for various subdomains.
 
-(For a complete list, see `www/README.md`.)
+   (For a complete list, see `www/README.md`.)
 
-While we recommend to obtain signed certificates from Let's Encrypt, it's also possible to let desec-stack generate self-signed certificates on startup by just skipping this step. To use the deSEC certbot hook, first download it to an appropriate location and set up your credentials and domain name.
+   While we recommend to obtain signed certificates from Let's Encrypt, it's also 
+   possible to let desec-stack generate self-signed certificates on startup by just 
+   skipping this step. To use the deSEC certbot hook, first download it to an 
+   appropriate location and set up your credentials and domain name.
 
-```
-mkdir -p ~/bin
-cd ~/bin
-curl https://raw.githubusercontent.com/desec-io/desec-certbot-hook/main/hook.sh > desec_certbot_hook.sh
-touch .dedynauth; chmod 600 .dedynauth
-echo DEDYN_TOKEN=${TOKEN} >> .dedynauth
-echo DEDYN_NAME=${DOMAIN} >> .dedynauth
-chmod +x desec_certbot_hook.sh
-```
+   ```
+   mkdir -p ~/bin
+   cd ~/bin
+   curl https://raw.githubusercontent.com/desec-io/desec-certbot-hook/main/hook.sh > 
+   desec_certbot_hook.sh
+   touch .dedynauth; chmod 600 .dedynauth
+   echo DEDYN_TOKEN=${TOKEN} >> .dedynauth
+   echo DEDYN_NAME=${DOMAIN} >> .dedynauth
+   chmod +x desec_certbot_hook.sh
+   ```
 
-Now we use `certbot` to obtain certificates, using the DNS challenge for authentication. Your current directory should be `~/bin`
+   Now we use `certbot` to obtain certificates, using the DNS challenge for 
+   authentication. Your current directory should be `~/bin`
 
-```
-       certbot \
-           --config-dir certbot/config --logs-dir certbot/logs --work-dir certbot/work \
+   ```
+
+   certbot \
+           --config-dir certbot/config --logs-dir certbot/logs --work-dir 
+   certbot/work \
            --manual --text --preferred-challenges dns \
            --manual-auth-hook ~/bin/desec_certbot_hook.sh \
            --manual-cleanup-hook ~/bin/desec_certbot_hook.sh \
            --server https://acme-v02.api.letsencrypt.org/directory \
-           -d "*.${DOMAIN}" -d "update.dedyn.${DOMAIN}" -d "update4.dedyn.$DOMAIN" -d "update6.dedyn.$DOMAIN" \
-           -d "checkip.dedyn.${DOMAIN}" -d "checkipv4.dedyn.${DOMAIN}" -d "checkipv6.dedyn.${DOMAIN}" \
+           -d "*.${DOMAIN}" -d "update.dedyn.${DOMAIN}" -d "update4.dedyn.$DOMAIN" - 
+   d "update6.dedyn.$DOMAIN" \
+           -d "checkip.dedyn.${DOMAIN}" -d "checkipv4.dedyn.${DOMAIN}" -d 
+           "checkipv6.dedyn.${DOMAIN}" \
            certonly
-```
+   ```
 
     Note that the definition of config, logs and work dir are only necessary if you do not want to run certbot as root.
     Verifying the DNS challenge takes a while, so allow this command to take a couple of minutes.
@@ -317,22 +326,22 @@ Now we use `certbot` to obtain certificates, using the DNS challenge for authent
     In the project root directory,
 
    ```
-       cd ~/desec-stack
-       mkdir certs
-       cd certs
-       for SUBNAME in desec www.desec get.desec checkip.dedyn checkipv4.dedyn checkipv6.dedyn dedyn www.dedyn update.dedyn update6.dedyn
+   cd ~/desec-stack
+   mkdir certs
+   cd certs
+   for SUBNAME in desec www.desec get.desec checkip.dedyn checkipv4.dedyn checkipv6.dedyn dedyn www.dedyn update.dedyn update6.dedyn
        do
            ln -s cer ${SUBNAME}.${DOMAIN}.cer
            ln -s key ${SUBNAME}.${DOMAIN}.key
        done
-```
+   ```
 
-**Copy the generated certificates
+   **Copy the generated certificates
 
-```
-       cp ~/bin/certbot/config/live/${DOMAIN}/fullchain.pem cer
-       cp ~/bin/certbot/config/live/${DOMAIN}/privkey.pem key
-```
+   ```
+   cp ~/bin/certbot/config/live/${DOMAIN}/fullchain.pem cer
+   cp ~/bin/certbot/config/live/${DOMAIN}/privkey.pem key
+   ```
 
     The last two steps need to be repeated whenever the certificates are renewed.
     While any location for the certificates is fine, the `certs/` folder is configured to be ignored by git so that private keys do not accidentally end up being committed.
