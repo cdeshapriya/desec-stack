@@ -261,16 +261,23 @@ To setup the necessary IP address records, we create a couple of A and AAAA reco
 As preparation, create a JSON file `dns.json` with the following content defining the DNS setup for desec-stack:
 
 ```
-[
-     {"type": "A",    "ttl":300, "records": ["127.0.0.1"], "subname": "desec"},             
-     {"type": "AAAA", "ttl":300, "records": ["::1"],       "subname": "desec"},
-     {"type": "A",    "ttl":300, "records": ["127.0.0.1"], "subname": "*.desec"},
-     {"type": "AAAA", "ttl":300, "records": ["::1"],       "subname": "*.desec"},
+export IPADDR_DESEC=###.###.###.###
+export IPADDR_NS1=###.###.###.###
+export IPADDR_NS2=###.###.###.###
+```
 
-     {"type": "A",    "ttl":300, "records": ["127.0.0.1"], "subname": "dedyn"},
-     {"type": "AAAA", "ttl":300, "records": ["::1"],       "subname": "dedyn"},
-     {"type": "A",    "ttl":300, "records": ["127.0.0.1"], "subname": "*.dedyn"},
-     {"type": "AAAA", "ttl":300, "records": ["::1"],       "subname": "*.dedyn"}
+```
+[
+    {"type": "A",    "ttl":3600, "records": ["$IPADDR_DESEC"], "subname": "dedyn"},
+    {"type": "A",    "ttl":3600, "records": ["$IPADDR_DESEC"], "subname": "*.dedyn"},
+    
+    {"type": "A",    "ttl":3600, "records": ["$IPADDR_DESEC"], "subname": "desec"},
+    {"type": "A",    "ttl":3600, "records": ["$IPADDR_DESEC"], "subname": "*.desec"},
+    
+    {"type": "A",    "ttl":3600, "records": ["$IPADDR_NS1"], "subname": "ns1"},
+
+    {"type": "A",    "ttl":3600, "records": ["$IPADDR_NS2"], "subname": "ns2"}
+
 ]
 ```
 
@@ -284,7 +291,7 @@ http POST https://desec.io/api/v1/domains/${DOMAIN}/rrsets/ Authorization:"Token
 
    (For a complete list, see `www/README.md`.)
 
-   While we recommend to obtain signed certificates from Let's Encrypt, it's also 
+   While we recommend obtaining signed certificates from Let's Encrypt, it's also 
    possible to let desec-stack generate self-signed certificates on startup by just 
    skipping this step. To use the deSEC certbot hook, first download it to an 
    appropriate location and set up your credentials and domain name.
@@ -304,7 +311,6 @@ http POST https://desec.io/api/v1/domains/${DOMAIN}/rrsets/ Authorization:"Token
    authentication. Your current directory should be `~/bin`
 
    ```
-
    certbot \
            --config-dir certbot/config --logs-dir certbot/logs --work-dir 
    certbot/work \
@@ -317,11 +323,11 @@ http POST https://desec.io/api/v1/domains/${DOMAIN}/rrsets/ Authorization:"Token
             certonly
    ```
 
-    Note that the definition of config, logs and work dir are only necessary if you do not want to run certbot as root.
-    Verifying the DNS challenge takes a while, so allow this command to take a couple of minutes.
+    Just so you know, the definition of config, logs, and work dir is only necessary if you do not want to run certbot as root.
+    Verifying the DNS challenge takes a while, so allow this command to take a few minutes.
     After successfully retrieving the certificate, you can find them in `certbot/config/live/$DOMAIN/`.
-    To make them available to desec-stack (in the default location), we copy certificate and keys.
-    In the project root directory,
+    To make them available to desec-stack (in the default location), we copy certificates and keys.
+    In the project root directory.
 
    ```
    cd ~/desec-stack
@@ -344,21 +350,30 @@ http POST https://desec.io/api/v1/domains/${DOMAIN}/rrsets/ Authorization:"Token
     The last two steps need to be repeated whenever the certificates are renewed.
     While any location for the certificates is fine, the `certs/` folder is configured to be ignored by git so that private keys do not accidentally end up being committed.
 
-1. **Configure desec-stack.** As docker compose application, desec-stack is configured by environment variables defined in the `.env` file in the project root directory.
-    Because it contains sensitive information for each deployment, `.env` is not part of the repository and ignored by git.
-    However, we ship `.env.default` and `.env.dev` with templates for production and development, respectively.
-    `.env.dev` is almost good enough for a basic development system, so let's use that as a basis:
+1. **Configure desec-stack.** As docker compose an application, desec-stack is configured by environment variables defined in the `.env` file in the project root directory.
 
-```
-cp> .env.default .env
-```
+   Because it contains sensitive information for each deployment, `.env` is not part of the repository and ignored by git. 
+   However, we ship `.env.default` and `.env.dev` with templates for production and development, respectively.
+   `.env.dev` is almost good enough for a basic development system, so let's use that as a basis:
+
+   ```
+   cp .env.default .env
+   ```
+   **To generate a secure password use the following command**
+
+   ```
+   openssl rand -hex 16
+   ```  
 
     Optionally, edit the file and
+   
     1. Configure an email server hostname, username, and password to deliver emails that can be included in `.env`. A convenient option is a MailTrap account.
+    
     2. adjust the network prefixes in `.env` to avoid collisions with other local networks.
 
     Additionally, the VPN server for the replication network needs to be equipped with a pre-shared key (PSK) and a public key infrastructure (PKI).
-    To generate the PSK, use the openvpn-server container:
+   
+    **To generate the PSK, use the openvpn-server container:**
 
     ```
     mkdir -p ~/desec-stack/openvpn-server/secrets
@@ -366,10 +381,11 @@ cp> .env.default .env
     ```
     docker compose build openvpn-server && docker compose run openvpn-server openvpn --genkey secret /dev/stdout > openvpn-server/secrets/ta.key
     ```
+    
     To build the PKI, we recommend [easy RSA](https://github.com/OpenVPN/easy-rsa).
-    **Please note that PKI instructions here are for development deployments only!**
-    **Using this setup for production WILL result in an INSECURE deployment!**
+
     To make it available, clone the repository and link to the executable:
+
 
     ```
     cd openvpn-server/secrets
@@ -390,22 +406,23 @@ cp> .env.default .env
    ln -s pki/ca.crt
    ```
 
-To issue a certificate for the OpenVPN server, generate a new key pair, a signing request, and sign the certificate.
+   To issue a certificate for the OpenVPN server, generate a new key pair, a signing request, and sign the certificate.
 
-```
-./easyrsa gen-req server nopass
-./easyrsa sign-req server server  # requires interaction
-```
+   ```
+   ./easyrsa gen-req server nopass
+   ./easyrsa sign-req server server  # requires interaction
+    ```
 
-Make the key and certificate available to OpenVPN server:
+   Make the key and certificate available to OpenVPN server:
 
-```
-ln -s pki/issued/server.crt
-ln -s pki/private/server.key
-```
+   ```
+   ln -s pki/issued/server.crt
+   ln -s pki/private/server.key
+   ```
 
-For provisioning a secondary, use the same `easy-rsa` PKI and create a new `client.key` and `client.crt` pair. Transfer these securely onto the secondary, along with `ca.crt` and `ta.key`.
-(You can also create the key on the secondary and only transfer a certificate signing request and the certificate.)
+   For provisioning a secondary, use the same `easy-rsa` PKI and create a new `client.key` and `client.crt` pair. Transfer these securely onto the secondary, along with `ca.crt` and `ta.key`.
+
+  (You can also create the key on the secondary and only transfer a certificate signing request and the certificate.)
 
 
 As the setup of OpenVPN is completed, return to the project directory:
@@ -422,10 +439,16 @@ npm install
 cd ~/desec-stack
 ```
 
-##To build the desec-stack
+## To build the desec-stack
 
 ```
 docker compose build
+```
+
+## To run the desec-stack
+
+```
+docker compose up -d
 ```
 
 If you run desec-stack for the first time, this will require a couple of downloads and take a while.
@@ -454,7 +477,7 @@ To check if desec-stack is working as expected, you can query the desec-stack na
 
 ```
 EMAIL=john@example.com
-PASSWORD=insecure
+PASSWORD=changeme
 ```
 
 # Register account (https://desec.readthedocs.io/en/latest/quickstart.html). Hint: In dev mode, the captcha response contains the plaintext challenge.
@@ -465,7 +488,7 @@ http POST https://desec.${DOMAIN}/api/v1/domains/ Authorization:"Token ${TOKEN}"
 http POST https://desec.${DOMAIN}/api/v1/domains/test.example/rrsets/ Authorization:"Token ${TOKEN}" type:=\"A\" ttl:=60 records:='["127.0.0.254"]'
 ```
 
-    After registering a user with your API, creating a domain and publishing some info to the DNS, use
+After registering a user with your API, creating a domain and publishing some info to the DNS, use
 
 ```
 dig @localhost -p 5321 test.example 
