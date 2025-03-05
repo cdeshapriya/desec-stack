@@ -434,7 +434,7 @@ cd ~/desec-stack
 1. **Install webapp dependencies.** To install the dependencies for the web site and GUI, run
 
 ```
-cd webapp/www
+cd www/webapp/
 npm install
 cd ~/desec-stack
 ```
@@ -455,12 +455,12 @@ If you run desec-stack for the first time, this will require a couple of downloa
 Once it is up and running, you can query the API home endpoint:
 
 ```
- http GET https://desec.${DOMAIN}/api/v1/
- ```
+http GET https://desec.${DOMAIN}/api/v1/
+```
 
- Congratulations, you have desec-stack up and running.
+Congratulations, you have desec-stack up and running.
 
- A convenient way to create a test user account is via
+A convenient way to create a test user account is via
 
 ```
 docker compose exec api python3 manage.py shell -c 'from desecapi.models import User; User.objects.create_user(email=admin@examp, password="test1234");'
