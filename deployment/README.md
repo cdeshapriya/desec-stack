@@ -312,11 +312,9 @@ http POST https://desec.io/api/v1/domains/${DOMAIN}/rrsets/ Authorization:"Token
            --manual-auth-hook ~/bin/desec_certbot_hook.sh \
            --manual-cleanup-hook ~/bin/desec_certbot_hook.sh \
            --server https://acme-v02.api.letsencrypt.org/directory \
-           -d "*.${DOMAIN}" -d "update.dedyn.${DOMAIN}" -d "update4.dedyn.$DOMAIN" - 
-   d "update6.dedyn.$DOMAIN" \
-           -d "checkip.dedyn.${DOMAIN}" -d "checkipv4.dedyn.${DOMAIN}" -d 
-           "checkipv6.dedyn.${DOMAIN}" \
-           certonly
+           -d "*.${DOMAIN}" -d "update.dedyn.${DOMAIN}" -d "update4.dedyn.$DOMAIN" -d "update6.dedyn.$DOMAIN" \
+           -d "checkip.dedyn.${DOMAIN}" -d "checkipv4.dedyn.${DOMAIN}" -d "checkipv6.dedyn.${DOMAIN}" \
+            certonly
    ```
 
     Note that the definition of config, logs and work dir are only necessary if you do not want to run certbot as root.
@@ -336,7 +334,7 @@ http POST https://desec.io/api/v1/domains/${DOMAIN}/rrsets/ Authorization:"Token
        done
    ```
 
-   **Copy the generated certificates
+   **Copy the generated certificates**
 
    ```
    cp ~/bin/certbot/config/live/${DOMAIN}/fullchain.pem cer
