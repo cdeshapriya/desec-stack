@@ -139,6 +139,30 @@
           DNS4EU and European DNS Shield).
         </v-col>
       </v-row>
+      <v-row align="center" class="py-2" justify="center">
+        <v-col class="col-12 col-lg-3 py-4">
+          <v-layout class="justify-center">
+            <img loading="lazy" src="../assets/non-free/Cybergate-Services-logo.png" alt="Cybergate Logo" class="mr-6" style="margin-bottom: 0; margin-top: 0; max-width: 200px; width: 100%"/>
+          </v-layout>
+        </v-col>
+        <v-col class="col-12 col-sm-10 col-lg-9 py-4 text-center">
+          As a <a class="primary--text text--darken-2" href="https://www.joindns4.eu/">DNS4EU</a> consortium member,
+          deSEC works to ensure implementation of robust and modern DNS security and privacy features.
+          This includes support for state-of-the-art DNSSEC as well as encrypted DNS transport.<br />
+          The project is co-funded by the European Union (project number: 101095329 21-EU-DIG-EU-DNS, project name:
+          DNS4EU and European DNS Shield).
+
+          <a class="primary--text text--darken-2" href="https://cybergate.lk/">Cybergate</a> realizes that if we can disseminate 
+          Digital identification information over DNS protocol governments  in the world can used 
+          Digital ID over secure DNS anycast network which is distributed and DNS 
+          keep track of the IP addresses of all the websites you visit, similarly 
+          it can be used to identify  people and their moving assets. In this project 
+          we extend the PowerDNS platform to carrying  <a class="primary--text text--darken-2" href="https://www.mosip.io//">MOSIP</a>
+          Digital Information data which is currenly centralized system which requires 
+          high cost bandwith networlzz
+        </v-col>
+      </v-row>
+
     </v-container>
   </v-container>
   <v-container fluid>
