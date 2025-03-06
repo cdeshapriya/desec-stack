@@ -11,8 +11,16 @@
               deSEC is a <strong>free DNS hosting</strong> service, <strong>designed with security in mind</strong>.
             </p>
             <p>
-              DIOD is an innovative domain name system (DNS) architecture that facilitates digital identification.
-              It can be used for providing digital ID to people and their assets that are in motion, such as vehicles, whether they are on land, sea, or in the air
+              DIOD is an innovative domain name system (DNS) infrastructure 
+              that facilitates digital identification. 
+              It can be used for providing digital IDs to people and 
+              their assets that are in motion, such as vehicles, 
+              whether they are on land, sea, or in the air.
+              
+              Currently, it can be used as a distributor of MOSIP 
+              Digital ID over low latency DNS anycast network which 
+              does not require high bandwidth requirement. 
+              
               It is running on <strong>open-source software</strong> and <strong>supported by <a href="https://securesystems.de/">SSE</a></strong>,
               deSEC is free for everyone to use.
             </p>
