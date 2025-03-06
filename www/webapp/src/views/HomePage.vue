@@ -146,14 +146,15 @@
           </v-layout>
         </v-col>
         <v-col class="col-12 col-sm-10 col-lg-9 py-4 text-center">
-         realizes that if we can disseminate digital identification information over DNS protocol, 
+         At <a class="primary--text text--darken-2" href="https://cybergate.lk/">Cybergate</a> we realize that if we can disseminate digital identification information over DNS protocol, 
          where governments in the world can use Digital ID over a secure DNS anycast network, 
-         which is distributed. As the DNS tracks the IP addresses of all the websites you visit, 
+         which is distributed and low cost. As the DNS tracks the IP addresses of all the websites you visit, 
          similarly, it can also be used to distribute identification for people and their moving assets, 
-         such as vehicles, which require unique identification. We extend the PowerDNS platform 
-         to carry MOSIP Digital ID Information data, which is currently a centralized system 
+         such as vehicles, which require unique identification. We extend the <a class="primary--text text--darken-2" href="https://powerdns.com/">PowerdNS</a> platform 
+         to carry <a class="primary--text text--darken-2" href="https://mosip.io/">MOSIP</a> Digital ID Information data, which is currently a centralized system 
          that requires a high-cost bandwidth network to have a single point of failure
-         and is susceptible to DDoS attacks.        </v-col>
+         and is susceptible to DDoS attacks. 
+        </v-col>
       </v-row>
 
     </v-container>
