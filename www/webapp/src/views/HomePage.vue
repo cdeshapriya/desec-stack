@@ -5,13 +5,15 @@
     <v-container class="pa-0">
       <v-row align="center">
         <v-col class="col-md-6 col-12 py-8 triangle-fg">
-          <h1 class="text-h4 font-weight-bold">Modern DNS Hosting for Everyone</h1>
+          <h1 class="text-h4 font-weight-bold">DIOD is a DNS platform that provides Digital ID Over DNS, powered by deSEC.</h1>
           <div class="text-subtitle-1 mt-2 pt-8 font-weight-regular">
             <p>
               deSEC is a <strong>free DNS hosting</strong> service, <strong>designed with security in mind</strong>.
             </p>
             <p>
-              Running on <strong>open-source software</strong> and <strong>supported by <a href="https://securesystems.de/">SSE</a></strong>,
+              DIOD is an innovative domain name system (DNS) architecture that facilitates digital identification.
+              It can be used for providing digital ID to people and their assets that are in motion, such as vehicles, whether they are on land, sea, or in the air
+              It is running on <strong>open-source software</strong> and <strong>supported by <a href="https://securesystems.de/">SSE</a></strong>,
               deSEC is free for everyone to use.
             </p>
           </div>
