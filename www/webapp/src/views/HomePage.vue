@@ -146,21 +146,14 @@
           </v-layout>
         </v-col>
         <v-col class="col-12 col-sm-10 col-lg-9 py-4 text-center">
-          As a <a class="primary--text text--darken-2" href="https://www.joindns4.eu/">DNS4EU</a> consortium member,
-          deSEC works to ensure implementation of robust and modern DNS security and privacy features.
-          This includes support for state-of-the-art DNSSEC as well as encrypted DNS transport.<br />
-          The project is co-funded by the European Union (project number: 101095329 21-EU-DIG-EU-DNS, project name:
-          DNS4EU and European DNS Shield).
-
-          <a class="primary--text text--darken-2" href="https://cybergate.lk/">Cybergate</a> realizes that if we can disseminate 
-          Digital identification information over DNS protocol governments  in the world can used 
-          Digital ID over secure DNS anycast network which is distributed and DNS 
-          keep track of the IP addresses of all the websites you visit, similarly 
-          it can be used to identify  people and their moving assets. In this project 
-          we extend the PowerDNS platform to carrying  <a class="primary--text text--darken-2" href="https://www.mosip.io//">MOSIP</a>
-          Digital Information data which is currenly centralized system which requires 
-          high cost bandwith networlzz
-        </v-col>
+         realizes that if we can disseminate digital identification information over DNS protocol, 
+         where governments in the world can use Digital ID over a secure DNS anycast network, 
+         which is distributed. As the DNS tracks the IP addresses of all the websites you visit, 
+         similarly, it can also be used to distribute identification for people and their moving assets, 
+         such as vehicles, which require unique identification. We extend the PowerDNS platform 
+         to carry MOSIP Digital ID Information data, which is currently a centralized system 
+         that requires a high-cost bandwidth network to have a single point of failure
+         and is susceptible to DDoS attacks.        </v-col>
       </v-row>
 
     </v-container>
