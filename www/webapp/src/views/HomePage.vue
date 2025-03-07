@@ -11,13 +11,13 @@
               deSEC is a <strong>free DNS hosting</strong> service, <strong>designed with security in mind</strong>.
             </p>
             <p>
-              DIOD is an innovative domain name system (DNS) infrastructure 
+              <a class="primary--text text--darken-2" href="https://diod.cybergate.one/">DIOD</a> is an innovative domain name system (DNS) infrastructure 
               that facilitates digital identification. 
               It can be used for providing digital IDs to people and 
               their assets that are in motion, such as vehicles, 
               whether they are on land, sea, or in the air.
               
-              Currently, it can be used as a distributor of MOSIP 
+              Currently, it can be used as a distributor of <a class="primary--text text--darken-2" href="https://mosip.io/">MOSIP</a> 
               Digital ID over low latency DNS anycast network which 
               does not require high bandwidth requirement. 
               
@@ -152,8 +152,7 @@
          similarly, it can also be used to distribute identification for people and their moving assets, 
          such as vehicles, which require unique identification. We extend the <a class="primary--text text--darken-2" href="https://powerdns.com/">PowerdNS</a> platform 
          to carry <a class="primary--text text--darken-2" href="https://mosip.io/">MOSIP</a> Digital ID Information data, which is currently a centralized system 
-         that requires a high-cost bandwidth network to have a single point of failure
-         and is susceptible to DDoS attacks. 
+         that requires a high-cost bandwidth network  and  can be a single point of failure as it is susceptible to DDoS attacks. 
         </v-col>
       </v-row>
 
